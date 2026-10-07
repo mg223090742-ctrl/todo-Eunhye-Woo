@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/todo-app/index.html" },
+    { "source": "/:path*", "destination": "/todo-app/:path*" }
+  ]
+}
