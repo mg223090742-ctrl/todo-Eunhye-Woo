@@ -42,6 +42,12 @@ h1 {
   border-radius: 8px;
 }
 
+.todo-form .author-input {
+  flex: 0 0 96px;
+  width: 96px;
+  font-size: 14px;
+}
+
 .todo-form button {
   padding: 10px 16px;
   font-size: 16px;
@@ -74,9 +80,18 @@ h1 {
   cursor: pointer;
 }
 
-.todo-item.done span {
+.todo-item.done label span {
   color: #999;
   text-decoration: line-through;
+}
+
+.author-tag {
+  padding: 2px 8px;
+  font-size: 12px;
+  color: #3b6ef5;
+  background: #eef2fe;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
 .delete-button {

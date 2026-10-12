@@ -1,5 +1,6 @@
 const form = document.getElementById('todo-form');
 const input = document.getElementById('todo-input');
+const authorInput = document.getElementById('author-input');
 const list = document.getElementById('todo-list');
 const emptyMessage = document.getElementById('empty-message');
 const errorMessage = document.getElementById('error-message');
@@ -20,12 +21,14 @@ function clearError() {
   errorMessage.hidden = true;
 }
 
-// 한글 조합 중에 누른 Enter는 무시해서 두 번 추가되지 않게 한다
-input.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter' && event.isComposing) {
-    event.preventDefault();
-  }
-});
+// 한글 조합 중에 누른 Enter는 무시해서 두 번 추가되지 않게 한다 (이름 칸, 할 일 칸 모두)
+for (const field of [authorInput, input]) {
+  field.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && event.isComposing) {
+      event.preventDefault();
+    }
+  });
+}
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault(); // 폼 제출 시 페이지가 새로고침되는 것을 막는다
@@ -33,11 +36,14 @@ form.addEventListener('submit', async (event) => {
   const text = input.value.trim();
   if (text === '') return;
 
+  // 이름은 안 적어도 된다. 비어 있으면 '이름 없음(null)'으로 저장한다
+  const author = authorInput.value.trim() || null;
+
   // 표에 한 줄 넣고, Supabase가 붙여 준 id까지 포함된 결과를 돌려받는다
   const { data, error } = await db
     .from('todos')
-    .insert({ text })
-    .select('id, text, done')
+    .insert({ text, author })
+    .select('id, text, done, author')
     .single();
 
   if (error) {
@@ -47,7 +53,7 @@ form.addEventListener('submit', async (event) => {
 
   clearError();
   todos.push(data);
-  input.value = '';
+  input.value = ''; // 이름은 다음 할 일에도 쓰도록 남겨 둔다
   render();
 });
 
@@ -90,7 +96,7 @@ async function deleteTodo(id) {
 async function loadTodos() {
   const { data, error } = await db
     .from('todos')
-    .select('id, text, done')
+    .select('id, text, done, author')
     .order('id');
 
   if (error) {
@@ -121,13 +127,22 @@ function render() {
     text.textContent = todo.text;
 
     label.append(checkbox, text);
+    item.append(label);
+
+    // 작성자 이름이 있을 때만 꼬리표를 붙인다
+    if (todo.author) {
+      const authorTag = document.createElement('span');
+      authorTag.className = 'author-tag';
+      authorTag.textContent = todo.author;
+      item.append(authorTag);
+    }
 
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-button';
     deleteButton.textContent = '삭제';
     deleteButton.addEventListener('click', () => deleteTodo(todo.id));
 
-    item.append(label, deleteButton);
+    item.append(deleteButton);
     list.append(item);
   }
 
