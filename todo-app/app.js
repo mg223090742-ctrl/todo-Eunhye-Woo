@@ -7,6 +7,7 @@ const emptyMessage = document.getElementById('empty-message');
 const remainingCount = document.getElementById('remaining-count');
 const filterButtons = document.querySelectorAll('.filter-button');
 const errorMessage = document.getElementById('error-message');
+const cheerMessage = document.getElementById('cheer-message');
 
 // Supabase 접속 (주소와 열쇠는 config.js에 있다)
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -52,6 +53,13 @@ function clearError() {
   errorMessage.hidden = true;
 }
 
+// '화이팅!'을 약 1.5초 동안 보여 줬다가 사라지게 한다 (나타나고 사라지는 움직임은 style.css에 있다)
+function showCheer() {
+  cheerMessage.classList.remove('show');
+  void cheerMessage.offsetWidth; // 연달아 추가해도 처음부터 다시 보이도록 움직임을 새로 시작한다
+  cheerMessage.classList.add('show');
+}
+
 // 한글 조합 중에 누른 Enter는 무시해서 두 번 추가되지 않게 한다 (이름 칸, 할 일 칸 모두)
 for (const field of [authorInput, input]) {
   field.addEventListener('keydown', (event) => {
@@ -90,6 +98,7 @@ form.addEventListener('submit', async (event) => {
   input.value = ''; // 이름은 다음 할 일에도 쓰도록 남겨 둔다
   dueInput.value = '';
   render();
+  showCheer();
 });
 
 async function toggleTodo(id) {

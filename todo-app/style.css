@@ -194,3 +194,29 @@ h1 {
   border-radius: 8px;
   font-size: 14px;
 }
+
+/* 화면 위쪽 가운데에 떠 있는 응원 문구. 평소에는 보이지 않는다 */
+.cheer-message {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #e02424;
+  opacity: 0;
+  pointer-events: none; /* 떠 있는 동안에도 뒤에 있는 버튼을 누를 수 있게 한다 */
+}
+
+.cheer-message.show {
+  animation: cheer 1.5s ease forwards;
+}
+
+/* 살짝 커지며 나타났다가, 잠깐 머문 뒤 서서히 사라진다 */
+@keyframes cheer {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+  15% { opacity: 1; transform: translateX(-50%) scale(1); }
+  75% { opacity: 1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) scale(1); }
+}
