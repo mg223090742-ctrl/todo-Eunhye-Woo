@@ -31,7 +31,26 @@ h1 {
 
 .todo-form {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+/* 마감일 칸은 이름·할 일 줄 아래에 따로 한 줄로 둔다 */
+.due-field {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.todo-form .due-field input {
+  flex: 0 0 auto;
+  padding: 6px 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
 .todo-form input {
@@ -92,6 +111,17 @@ h1 {
   background: #eef2fe;
   border-radius: 999px;
   white-space: nowrap;
+}
+
+.due-tag {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+}
+
+.due-tag.overdue {
+  color: #d33;
+  font-weight: 600;
 }
 
 .delete-button {

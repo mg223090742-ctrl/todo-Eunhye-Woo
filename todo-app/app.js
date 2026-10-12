@@ -1,6 +1,7 @@
 const form = document.getElementById('todo-form');
 const input = document.getElementById('todo-input');
 const authorInput = document.getElementById('author-input');
+const dueInput = document.getElementById('due-input');
 const list = document.getElementById('todo-list');
 const emptyMessage = document.getElementById('empty-message');
 const errorMessage = document.getElementById('error-message');
@@ -39,11 +40,14 @@ form.addEventListener('submit', async (event) => {
   // 이름은 안 적어도 된다. 비어 있으면 '이름 없음(null)'으로 저장한다
   const author = authorInput.value.trim() || null;
 
+  // 마감일도 안 적어도 된다. 날짜 칸 값은 '2026-10-15' 같은 글자다
+  const due_date = dueInput.value || null;
+
   // 표에 한 줄 넣고, Supabase가 붙여 준 id까지 포함된 결과를 돌려받는다
   const { data, error } = await db
     .from('todos')
-    .insert({ text, author })
-    .select('id, text, done, author')
+    .insert({ text, author, due_date })
+    .select('id, text, done, author, due_date')
     .single();
 
   if (error) {
@@ -54,6 +58,7 @@ form.addEventListener('submit', async (event) => {
   clearError();
   todos.push(data);
   input.value = ''; // 이름은 다음 할 일에도 쓰도록 남겨 둔다
+  dueInput.value = '';
   render();
 });
 
@@ -96,7 +101,7 @@ async function deleteTodo(id) {
 async function loadTodos() {
   const { data, error } = await db
     .from('todos')
-    .select('id, text, done, author')
+    .select('id, text, done, author, due_date')
     .order('id');
 
   if (error) {
@@ -109,11 +114,36 @@ async function loadTodos() {
   render();
 }
 
+// 오늘 날짜를 '2026-10-12' 같은 글자로 만든다 (마감일과 같은 모양이라 바로 비교할 수 있다)
+function todayString() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+// '2026-10-15' → '10월 15일'
+function formatDueDate(dueDate) {
+  const [, month, day] = dueDate.split('-');
+  return `${Number(month)}월 ${Number(day)}일`;
+}
+
+// 마감이 가까운 순서로 정렬한다. 마감일이 없으면 맨 아래, 같으면 추가한 순서대로
+function compareTodos(a, b) {
+  if (a.due_date !== b.due_date) {
+    if (a.due_date === null) return 1;
+    if (b.due_date === null) return -1;
+    return a.due_date < b.due_date ? -1 : 1;
+  }
+  return a.id - b.id;
+}
+
 // todos 배열 내용대로 화면을 다시 그린다
 function render() {
   list.innerHTML = '';
+  const today = todayString();
 
-  for (const todo of todos) {
+  for (const todo of [...todos].sort(compareTodos)) {
     const item = document.createElement('li');
     item.className = todo.done ? 'todo-item done' : 'todo-item';
 
@@ -135,6 +165,17 @@ function render() {
       authorTag.className = 'author-tag';
       authorTag.textContent = todo.author;
       item.append(authorTag);
+    }
+
+    // 마감일이 있을 때만 보여 준다. 끝내지 못했는데 마감이 지났으면 빨갛게 표시한다
+    if (todo.due_date) {
+      const dueTag = document.createElement('span');
+      dueTag.className = 'due-tag';
+      if (!todo.done && todo.due_date < today) {
+        dueTag.classList.add('overdue');
+      }
+      dueTag.textContent = `${formatDueDate(todo.due_date)}까지`;
+      item.append(dueTag);
     }
 
     const deleteButton = document.createElement('button');
