@@ -91,15 +91,24 @@ h1 {
   border-bottom: 1px solid #eee;
 }
 
-.todo-item label {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.todo-item input[type="checkbox"] {
   cursor: pointer;
 }
 
-.todo-item.done label span {
+.todo-text {
+  flex: 1;
+}
+
+.edit-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: 16px;
+  border: 1px solid #3b6ef5;
+  border-radius: 6px;
+}
+
+.todo-item.done .todo-text {
   color: #999;
   text-decoration: line-through;
 }

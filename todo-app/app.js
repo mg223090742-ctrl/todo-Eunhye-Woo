@@ -81,6 +81,73 @@ async function toggleTodo(id) {
   render();
 }
 
+async function updateTodoText(id, text) {
+  const { error } = await db
+    .from('todos')
+    .update({ text })
+    .eq('id', id);
+
+  if (error) {
+    showError('할 일을 고치지 못했어요', error);
+    return false;
+  }
+
+  clearError();
+  const todo = todos.find((t) => t.id === id);
+  todo.text = text;
+  return true;
+}
+
+// 할 일 글자를 입력칸으로 바꿔서 고칠 수 있게 한다
+// Enter는 저장, Esc는 취소, 다른 곳을 누르면 저장하지 않고 취소한다
+function startEditing(todo, textElement) {
+  const editInput = document.createElement('input');
+  editInput.type = 'text';
+  editInput.className = 'edit-input';
+  editInput.value = todo.text;
+  textElement.replaceWith(editInput);
+  editInput.focus();
+  editInput.select();
+
+  // 저장이나 취소가 이미 시작됐는지 표시한다 (Enter 뒤에 blur가 또 처리되지 않게)
+  let finished = false;
+
+  editInput.addEventListener('keydown', async (event) => {
+    // 한글 조합 중에 누른 Enter/Esc는 글자 조합에만 쓰이게 무시한다
+    if (event.isComposing || finished) return;
+
+    if (event.key === 'Escape') {
+      finished = true;
+      render(); // 원래 글자로 되돌린다
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      const newText = editInput.value.trim();
+
+      // 비웠거나 그대로면 저장할 필요 없이 원래대로 돌아간다
+      if (newText === '' || newText === todo.text) {
+        finished = true;
+        render();
+        return;
+      }
+
+      finished = true;
+      const saved = await updateTodoText(todo.id, newText);
+      if (saved) {
+        render();
+      } else {
+        finished = false; // 실패하면 입력칸을 그대로 두어 다시 시도할 수 있게 한다
+        editInput.focus();
+      }
+    }
+  });
+
+  editInput.addEventListener('blur', () => {
+    if (finished) return;
+    finished = true;
+    render();
+  });
+}
+
 async function deleteTodo(id) {
   const { error } = await db
     .from('todos')
@@ -147,17 +214,20 @@ function render() {
     const item = document.createElement('li');
     item.className = todo.done ? 'todo-item done' : 'todo-item';
 
-    const label = document.createElement('label');
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.checked = todo.done;
     checkbox.addEventListener('change', () => toggleTodo(todo.id));
 
+    // 글자를 두 번 누르면 고칠 수 있다
+    // (글자를 체크박스와 따로 두어서, 두 번 누를 때 체크가 같이 바뀌지 않게 한다)
     const text = document.createElement('span');
+    text.className = 'todo-text';
     text.textContent = todo.text;
+    text.title = '두 번 누르면 고칠 수 있어요';
+    text.addEventListener('dblclick', () => startEditing(todo, text));
 
-    label.append(checkbox, text);
-    item.append(label);
+    item.append(checkbox, text);
 
     // 작성자 이름이 있을 때만 꼬리표를 붙인다
     if (todo.author) {
