@@ -77,6 +77,43 @@ h1 {
   cursor: pointer;
 }
 
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 16px 0 0;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.filter-button {
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #555;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* 지금 고른 버튼은 파랗게 칠한다 */
+.filter-button[aria-pressed="true"] {
+  color: #fff;
+  background: #3b6ef5;
+  border-color: #3b6ef5;
+}
+
+.remaining-count {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  white-space: nowrap;
+}
+
 .todo-list {
   margin: 16px 0 0;
   padding: 0;

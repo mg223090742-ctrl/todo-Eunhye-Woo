@@ -23,6 +23,15 @@
 
     <p id="error-message" class="error-message" hidden></p>
 
+    <div class="list-toolbar">
+      <div class="filter-buttons">
+        <button type="button" class="filter-button" data-filter="all" aria-pressed="true">전체</button>
+        <button type="button" class="filter-button" data-filter="active" aria-pressed="false">진행중</button>
+        <button type="button" class="filter-button" data-filter="done" aria-pressed="false">완료</button>
+      </div>
+      <p id="remaining-count" class="remaining-count"></p>
+    </div>
+
     <ul id="todo-list" class="todo-list"></ul>
     <p id="empty-message" class="empty-message">할 일이 없습니다 🎉</p>
   </main>

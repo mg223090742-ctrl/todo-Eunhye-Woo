@@ -4,6 +4,8 @@ const authorInput = document.getElementById('author-input');
 const dueInput = document.getElementById('due-input');
 const list = document.getElementById('todo-list');
 const emptyMessage = document.getElementById('empty-message');
+const remainingCount = document.getElementById('remaining-count');
+const filterButtons = document.querySelectorAll('.filter-button');
 const errorMessage = document.getElementById('error-message');
 
 // Supabase 접속 (주소와 열쇠는 config.js에 있다)
@@ -11,6 +13,34 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 // 화면에 보여 줄 할 일 목록 (Supabase todos 표에서 불러온다)
 let todos = [];
+
+// 지금 골라 보는 목록: 'all'(전체), 'active'(진행중), 'done'(완료)
+let currentFilter = 'all';
+
+// 목록이 비었을 때 고른 버튼에 맞춰 보여 줄 안내 문구
+const emptyMessages = {
+  all: '할 일이 없습니다 🎉',
+  active: '진행 중인 할 일이 없어요 🎉',
+  done: '아직 완료한 할 일이 없어요',
+};
+
+// 전체/진행중/완료 버튼을 누르면 그 목록만 보여 준다
+for (const button of filterButtons) {
+  button.addEventListener('click', () => {
+    currentFilter = button.dataset.filter;
+    for (const b of filterButtons) {
+      b.setAttribute('aria-pressed', String(b === button));
+    }
+    render();
+  });
+}
+
+// 고른 버튼에 맞는 할 일인지 확인한다
+function matchesFilter(todo) {
+  if (currentFilter === 'active') return !todo.done;
+  if (currentFilter === 'done') return todo.done;
+  return true;
+}
 
 // 오류가 나면 화면에 빨간 상자로 보여 준다
 function showError(message, error) {
@@ -210,7 +240,9 @@ function render() {
   list.innerHTML = '';
   const today = todayString();
 
-  for (const todo of [...todos].sort(compareTodos)) {
+  const visibleTodos = todos.filter(matchesFilter).sort(compareTodos);
+
+  for (const todo of visibleTodos) {
     const item = document.createElement('li');
     item.className = todo.done ? 'todo-item done' : 'todo-item';
 
@@ -257,7 +289,12 @@ function render() {
     list.append(item);
   }
 
-  emptyMessage.hidden = todos.length > 0;
+  emptyMessage.textContent = emptyMessages[currentFilter];
+  emptyMessage.hidden = visibleTodos.length > 0;
+
+  // 남은 할 일 개수는 어떤 버튼을 골랐든 끝내지 않은 할 일을 센다
+  const remaining = todos.filter((t) => !t.done).length;
+  remainingCount.textContent = `남은 할 일 ${remaining}개`;
 }
 
 loadTodos();
