@@ -16,10 +16,15 @@
       <button type="submit">추가</button>
     </form>
 
+    <p id="error-message" class="error-message" hidden></p>
+
     <ul id="todo-list" class="todo-list"></ul>
     <p id="empty-message" class="empty-message">할 일이 없습니다 🎉</p>
   </main>
 
+  <!-- Supabase에 접속하는 도구 → 접속 정보 → 앱 순서로 불러온다 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

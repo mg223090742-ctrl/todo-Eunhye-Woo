@@ -93,3 +93,13 @@ h1 {
   color: #999;
   text-align: center;
 }
+
+.error-message {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  border-radius: 8px;
+  font-size: 14px;
+}
